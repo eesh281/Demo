@@ -1,9 +1,11 @@
+from django.core.checks import messages
 from django.shortcuts import render
 from .models import Employee, Data_from_manager,Scheduler, SlotPreference
 import json
 from django.http import HttpResponse
 import datetime
 from .utils import sorter, serializer
+from .send import send_msg
 
 def create_employee(request):
     if request.method == "POST":
@@ -161,8 +163,28 @@ def create_scheduler(request,store_id):
             scheduler_object.save()
             scheduler_data=serializer(scheduler_data,scheduler_data_obj,scheduler_object)
         
+        message={}
+        msg_obj = Scheduler.objects.filter(scheduling_day=datetime.datetime.now().date())
+        obj_list1=[]
+        obj_list2=[]
+        obj_list3=[]  
+        for items in msg_obj:
+
+            if items.assigned_slot=='06:00am-02:00pm':
+                obj_list1.append(items.employee.id)
+                message['06:00am-02:00pm'] = obj_list1
+
+            if items.assigned_slot=='02:00pm-10:00pm':
+                obj_list2.append(items.employee.id)
+                message['02:00pm-10:00pm'] = obj_list2
+
+            if items.assigned_slot=='10:00pm-06:00am':
+                obj_list3.append(items.employee.id)
+                message['10:00pm-06:00am'] = obj_list3
+                
+        send_msg(message)
+        
         return HttpResponse(json.dumps({'success':True,'scheduler_data':scheduler_data}))
 
     return HttpResponse(json.dumps({'success':False,'message':'wrong request type'}))
-
 

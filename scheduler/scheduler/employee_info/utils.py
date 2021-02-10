@@ -23,7 +23,7 @@ def sorter(lista,listb,listc,manageral_obj):
         
         del lista[-1]  
             
-        if listb>len(listc):  
+        if len(listb)>len(listc):  
             listc.append(popped_element)
         else:
             listb.append(popped_element)
